@@ -16,6 +16,12 @@ def accuracy(y_hat, y):
     """
     assert(y_hat.size == y.size)
     # TODO: Write here
+    a=0
+    for i in range(len(y)):
+        if y[i]==y_hat[i]:
+            a+=1
+    acc = a/len(y)
+    return acc
     pass
 
 def precision(y_hat, y, cls):
@@ -54,7 +60,8 @@ def rmse(y_hat, y):
     Output:
     > Returns the rmse as float
     """
-
+    rse = (sum((y_hat-y)**2)/len(y))**0.5
+    return rse
     pass
 
 def mae(y_hat, y):
@@ -67,4 +74,6 @@ def mae(y_hat, y):
     Output:
     > Returns the mae as float
     """
+    me = sum(abs(y_hat-y))/len(y)
+    return me
     pass

@@ -35,6 +35,15 @@ def precision(y_hat, y, cls):
     Output:
     > Returns the precision as float
     """
+    q=0
+    w=0
+    for i in range(len(y)):
+        if y_hat[i]==y[i]  and y_hat[i]==cls:
+            q+=1
+        if y_hat[i]==cls:
+            w+=1
+    pre = q/w
+    return pre
     pass
 
 def recall(y_hat, y, cls):
@@ -48,6 +57,15 @@ def recall(y_hat, y, cls):
     Output:
     > Returns the recall as float
     """
+    e=0
+    r=0
+    for i in range(len(y)):
+        if y_hat[i]==y[i] and y[i]==cls:
+            e+=1
+        if y[i]==cls:
+            r+=1
+    rec = e/r
+    return rec
     pass
 
 def rmse(y_hat, y):

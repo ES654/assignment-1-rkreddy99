@@ -7,6 +7,7 @@ You will be expected to use this to make trees for:
 > discrete input, real output
 """
 
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -88,6 +89,11 @@ class DecisionTree():
                 if self.criterion == "information_gain":
                     for i in range(len(l)):
                         a.append(information_gain(y,X[l[i]]))
+                    mode = l[a.index(max(a))]
+
+                if self.criterion == "gini_index":
+                    for i in range(len(l)):
+                        a.append(gini_index(y,X[l[i]]))
                     mode = l[a.index(max(a))]
                 
 

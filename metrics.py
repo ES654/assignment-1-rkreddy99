@@ -39,7 +39,7 @@ def precision(y_hat, y, cls):
             q+=1
         if y_hat.iloc[i]==cls:
             w+=1
-    pre = q/w
+    pre = q/max(w,1)
     return pre
     pass
 

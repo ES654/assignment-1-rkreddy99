@@ -32,6 +32,10 @@ for criteria in ['information_gain', 'gini_index']:
     print('Criteria :', criteria)
     print('RMSE: ', rmse(y_hat, y))
     print('MAE: ', mae(y_hat, y))
+    print('Accuracy: ', accuracy(y_hat, y))
+    for cls in y.unique():
+        print('Precision: ', precision(y_hat, y, cls))
+        print('Recall: ', recall(y_hat, y, cls))    
 
 # Test case 2
 # Real Input and Discrete Output

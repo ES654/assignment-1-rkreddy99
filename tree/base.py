@@ -15,13 +15,17 @@ from .utils import entropy, information_gain, gini_index
 np.random.seed(42)
 
 class DecisionTree():
-    def __init__(self, criterion):
+    def __init__(self, criterion, max_depth):
         """
         Put all infromation to initialize your tree here.
         Inputs:
         > criterion : {"information_gain", "gini_index"}
         """
-        pass
+        self.criterion = criterion
+        self.max_depth = max_depth
+        self.node={}
+        
+    def split(self):
 
     def fit(self, X, y):
         """
@@ -30,7 +34,53 @@ class DecisionTree():
         X: pd.DataFrame with rows as samples and columns as features (shape of X is N X P) where N is the number of samples and P is the number of columns.
         y: pd.Series with rows corresponding to output variable (shape of Y is N)
         """
-        pass
+        if "float" not in str(type(y.iloc[0])):
+            if self.max_depth==0:
+                d={}
+                for i in range(len(y)):
+                    if y[i] in d:
+                        d[y[i]]+=1
+                    else:
+                        d[y[i]]=1
+            return {'output' : max(d, key=d.get)}
+            if "float" not in str(type(X.iloc[0,0])):
+                l=list(X.columns)
+                a=[]
+                mode = ''
+                if self.criterion == "information_gain":
+                    for i in range(len(l)):
+                        a.append(information_gain(y,X[l[i]]))
+                    mode = l[a.index(max(a))]
+                elif self.criterion == "gini_index":
+                    for i in range(l):
+                        a.append(information_gain(y,X[l[i]]))
+                    mode = l[a.index(max(a))]
+                
+
+                else:
+                    q = set(X[mode])
+                    self.node[mode] = []
+                    for i in q:
+                        Xd = X.where(X[mode] == i)
+                        Xd.dropna(inplace = True)
+                        Xd.drop([mode], axis=1, inplace=True)
+                        indlist = Xd.index.tolist()
+                        yd = pd.Series(y[i] for i in indlist)
+                        self.node[mode].append(i)
+                        self.node[mode].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd,yd))
+
+            else:
+                l=list(X.columns)
+                s=[]
+                for i in range(len(l)):
+                    indexlist = list(X[l[i]].argsort())
+                    X_sorted = X[l[i]].sort()
+                    y_sorted = [y[j] for j in indexlist]
+                    x = []
+                    for k in range(len(X[l[i]])):
+                        
+                
+                   
 
     def predict(self, X):
         """
@@ -40,7 +90,7 @@ class DecisionTree():
         Output:
         y: pd.Series with rows corresponding to output variable. THe output variable in a row is the prediction for sample in corresponding row in X.
         """
-        pass
+        
 
     def plot(self):
         """
@@ -54,4 +104,4 @@ class DecisionTree():
             N: Class C
         Where Y => Yes and N => No
         """
-        pass
+        

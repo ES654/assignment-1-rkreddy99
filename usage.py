@@ -57,7 +57,7 @@ for criteria in ['information_gain', 'gini_index']:
         print('Recall: ', recall(y_hat, y, cls))
 
 
-# Test case 3
+# Test case 3n     
 # Discrete Input and Discrete Output
 
 N = 30

@@ -16,7 +16,7 @@ def accuracy(y_hat, y):
     # TODO: Write here
     a=0
     for i in range(len(y)):
-        if y[i]==y_hat[i]:
+        if y.iloc[i]==y_hat.iloc[i]:
             a+=1
     acc = a/len(y)
     return acc
@@ -35,9 +35,9 @@ def precision(y_hat, y, cls):
     q=0
     w=0
     for i in range(len(y)):
-        if y_hat[i]==y[i]  and y_hat[i]==cls:
+        if y_hat.iloc[i]==y[i]  and y_hat.iloc[i]==cls:
             q+=1
-        if y_hat[i]==cls:
+        if y_hat.iloc[i]==cls:
             w+=1
     pre = q/w
     return pre
@@ -56,9 +56,9 @@ def recall(y_hat, y, cls):
     e=0
     r=0
     for i in range(len(y)):
-        if y_hat[i]==y[i] and y[i]==cls:
+        if y_hat.iloc[i]==y.iloc[i] and y.iloc[i]==cls:
             e+=1
-        if y[i]==cls:
+        if y.iloc[i]==cls:
             r+=1
     rec = e/r
     return rec
@@ -73,7 +73,11 @@ def rmse(y_hat, y):
     Output:
     > Returns the rmse as float
     """
-    rse = (sum((y_hat-y)**2)/len(y))**0.5
+    rse=0
+    for i in range(len(y)):
+        rse+=(y.iloc[i] - y_hat.iloc[i])**2
+    rse = rse/len(y)
+    rse = rse**0.5
     return rse
     pass
 
@@ -86,6 +90,9 @@ def mae(y_hat, y):
     Output:
     > Returns the mae as float
     """
-    me = sum(abs(y_hat-y))/len(y)
+    me=0
+    for i in range(len(y)):
+        me+=abs(y_hat.iloc[i] - y.iloc[i])
+    me = me/len(y)
     return me
     pass

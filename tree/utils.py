@@ -10,10 +10,10 @@ def entropy(Y):
     """
     d={}
     for i in range(len(Y)):
-      if Y[i] in d:
-        d[Y[i]]+=1
-      elif Y[i] not in d:
-        d[Y[i]] = 1
+      if Y.iloc[i] in d:
+        d[Y.iloc[i]]+=1
+      elif Y.iloc[i] not in d:
+        d[Y.iloc[i]] = 1
     sum=0
     for i in d:
       sum+=d[i]
@@ -26,7 +26,7 @@ def entropy(Y):
     return entro
     
 
-def ginindex(Y):
+def gini_index(Y):
     """
     Function to calculate the gini index
     Inputs:
@@ -36,10 +36,10 @@ def ginindex(Y):
     """
     d={}
     for i in range(len(Y)):
-      if Y[i] in d:
-        d[Y[i]]+=1
-      elif Y[i] not in d:
-        d[Y[i]] = 1
+      if Y.iloc[i] in d:
+        d[Y.iloc[i]]+=1
+      elif Y.iloc[i] not in d:
+        d[Y.iloc[i]] = 1
     sum=0
     for i in d:
       sum+=d[i]
@@ -51,8 +51,7 @@ def ginindex(Y):
 
     ind = 1-p
     return ind
-    
-def gini_index(Y,attr):
+  
       
 def information_gain(Y, attr):
     """

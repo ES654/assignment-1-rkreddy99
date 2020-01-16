@@ -27,19 +27,23 @@ class DecisionTree():
         
     def split(self, X, y, attr):
         sortind = X[attr].argsort()
-        X_sort = X[attr].sort()
-        y_sort = [y[i] for i in sortind]
+        X_sort = X.sort_values(attr)
+        X_sort = X.sort[attr]
+        X_sort1 = X.sort_values(attr)
+        X_sort1 = list(set(X_sort[attr]))
+        y_sort = [y.iloc[i] for i in sortind]
         s=[]
         m=[]
         n=[]
         for i in range(len(X_sort)-1):
-            a = (X_sort[i]+X_sort[i+1])/2
-            for j in range(len(X)):
-                if X_sort[j]<=a:
-                    m.append(y_sort[j])
-                else:
-                    n.append(y_sort[j])
-            s.append(entropy(y) - (len(m)/len(y))*entropy(m) - (len(n)/len(y))*entropy(n))
+            if X_sort[i]!=X_sort[i+1]:
+                a = (X_sort[i]+X_sort[i+1])/2
+                for j in range(len(X)):
+                    if X_sort[j]<=a:
+                        m.append(y_sort[j])
+                    else:
+                        n.append(y_sort[j])
+                s.append(entropy(y) - (len(m)/len(y))*entropy(pd.Series(m)) - (len(n)/len(y))*entropy(pd.Series(n)))
         return s
 
 
@@ -70,14 +74,14 @@ class DecisionTree():
         y: pd.Series with rows corresponding to output variable (shape of Y is N)
         """
         if "float" not in str(type(y.iloc[0])):
-            if self.max_depth==0:
+            if self.max_depth==0 or len(np.unique(y))==1 or len(y) == 1:
                 d={}
                 for i in range(len(y)):
                     if y[i] in d:
                         d[y[i]]+=1
                     else:
                         d[y[i]]=1
-            return {'output' : max(d, key=d.get)}
+                return {'output' : max(d, key=d.get)}
             if "float" not in str(type(X.iloc[0,0])):
                 l=list(X.columns)
                 a=[]
@@ -92,7 +96,7 @@ class DecisionTree():
                     mode = l[a.index(max(a))]
                 
 
-                if max_depth!=0:
+                if max_depth!=0 :
                     q = set(X[mode])
                     self.node[mode] = []
                     for i in q:
@@ -105,30 +109,35 @@ class DecisionTree():
 
             else:
                 h = list(X.columns)
-                s=[]
+                p=[]
                 for i in h:
-                    s+=DecisionTree(self.criterion, self.max_depth).split(X,y,i)
-                maxind = [(s.index(max(s))//len(y))-1, s.index(max(s)%len(y) - 1)]
-                div_node = h[maxind[0]]
-                div_ind = maxind[1]
-                X_sort = X[div_node].sort()
-                div_val = (X_sort[div_ind]+X_sort[div_ind+1])/2
-                Xd1 = X.loc[X[mode] <= div_val]
-                Xd2 = X.loc[X[mode] > div_val]
-                Xd1.drop([mode],axis=1,inplace=True)
-                Xd2.drop([mode],axis=1,inplace=True)
-                indlist1 = Xd1.index.tolist()
-                yd1 = pd.Series(y[i] for i in indlist)
-                indlist2 = Xd2.index.tolist()
-                yd2 = pd.Series(y[i] for i in indlist) 
+                    p.append(DecisionTree(self.criterion, self.max_depth).split(X,y,i))
+                max=-9999
+                max1 = -9999
+                max2 = -9999
+                for i in range(len(p)):
+                    for j in range(len(p[i])):
+                        if p[i][j]>max:
+                            max1 = i
+                            max2 = j
+                div_node = h[max1]
+                div_ind = max2
+                X_sort = X.sort_values(div_node)
+                X_sort = X_sort.loc[div_node]
+                div_val = (X_sort.iloc[div_ind]+X_sort.iloc[div_ind+1])/2
+                Xd1 = X.loc[X[div_node] <= div_val]
+                Xd2 = X.loc[X[div_node] > div_val]
+                Xd1.drop([div_node],axis=1,inplace=True)
+                Xd2.drop([div_node],axis=1,inplace=True) 
                 self.node[div_node]=[]
-                self.node[div_node].append("<= "+ str(div_val))
-                self.node[div_node].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd1,yd1))
-                self.node[div_node].append("> "+ str(div_val))
-                self.node[div_node].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd2,yd2)) 
+                self.node[div_node].append(div_val)
+                self.node[div_node].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd1, y.loc[X[div_node] <= div_val].copy()))
+                self.node[div_node].append(div_val)
+                self.node[div_node].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd2, y.loc[X[div_node] > div_val].copy())) 
 
         else:
-            if self.max_depth==0:
+            
+            if self.max_depth==0 or len(np.unique(y))==1 or len(y) == 1:
                 return {"output":sum(y)/y.size}
 
 
@@ -149,26 +158,32 @@ class DecisionTree():
                 h = list(X.columns)
                 s=[]
                 for i in h:
-                    s+=DecisionTree(self.criterion, self.max_depth).split(X,y,i)
-                maxind = [(s.index(max(s))//len(y))-1, s.index(max(s)%len(y) - 1)]
-                div_node = h[maxind[0]]
-                div_ind = maxind[1]
-                X_sort = X[div_node].sort()
-                div_val = (X_sort[div_ind]+X_sort[div_ind+1])/2
-                Xd1 = X.loc[X[mode] <= div_val]
-                Xd2 = X.loc[X[mode] > div_val]
-                Xd1.drop([mode],axis=1,inplace=True)
-                Xd2.drop([mode],axis=1,inplace=True)
-                indlist1 = Xd1.index.tolist()
-                yd1 = pd.Series(y[i] for i in indlist)
-                indlist2 = Xd2.index.tolist()
-                yd2 = pd.Series(y[i] for i in indlist) 
+                    s.append(DecisionTree(self.criterion, self.max_depth).split(X,y,i))
+                max=-9999
+                max1 = -9999
+                max2 = -9999
+                for i in range(len(s)):
+                    for j in range(len(s[i])):
+                        if s[i][j]>max:
+                            max1 = i
+                            max2 = j
+                div_node = h[max1]
+                div_ind = max2
+                X_sort = X.sort_values(div_node)
+                X_sort = X_sort[div_node]
+                print(X_sort.iloc[div_ind])
+                div_val = (X_sort.iloc[div_ind]+X_sort.iloc[div_ind+1])/2
+                Xd1 = X.loc[X[div_node] <= div_val]
+                Xd2 = X.loc[X[div_node] > div_val]
+                Xd1.drop([div_node],axis=1,inplace=True)
+                Xd2.drop([div_node],axis=1,inplace=True)
                 self.node[div_node]=[]
-                self.node[div_node].append("<= "+ str(div_val))
-                self.node[div_node].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd1,yd1))
-                self.node[div_node].append("> "+ str(div_val))
-                self.node[div_node].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd2,yd2))         
+                self.node[div_node].append(div_val)
+                self.node[div_node].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd1, y.loc[X[div_node] <= div_val].copy()))
+                self.node[div_node].append(div_val)
+                self.node[div_node].append(DecisionTree(self.criterion, self.max_depth-1).fit(Xd2, y.loc[X[div_node] > div_val].copy()))         
 
+        print(self.node)
         return self.node
                 
 
@@ -181,7 +196,37 @@ class DecisionTree():
         Output:
         y: pd.Series with rows corresponding to output variable. THe output variable in a row is the prediction for sample in corresponding row in X.
         """
-        
+        y=[]
+        if "float" not in str(type(X.iloc[0,0])):
+            for i in range(len(X)):
+                d = self.node
+                w = 0
+                q = list(d.keys())[0]
+                while(isinstance(d[q],list)):
+                    w = d[q].index(X.iloc[i,X.columns.get_loc(q)])
+                    d = d[q][w+1]
+                    q = list(d.keys())[0]
+                if q=='output':
+                    y.append(d[q])
+        else:
+            for i in range(len(X)):
+                d = self.node
+                w = 0
+                q = list(d.keys())[0]
+                while(isinstance(d[q],list)):
+                    if X.iloc[i,X.columns.get_loc(q)]<=d[q][0]:
+                        w=0
+                        d = d[q][w+1]
+                        q = list(d.keys())[0]
+                    else:
+                        w=2
+                        d = d[q][w+1]
+                        q = list(d.keys())[0]
+                if q=='output':
+                    y.append(d[q])
+        return pd.Series(y)
+
+
 
     def plot(self):
         """
